@@ -1224,31 +1224,35 @@ body {
    4. 3D PARALLAX GALLERY & GYROSCOPIC STYLES
    ========================================== */
 
-/* Artwork Wall redesign for Parallax */
+/* Artwork Wall redesigned to prevent overlaps and improve spacing */
 .artwork-wall {
-    width: 60vw;
-    min-width: 500px;
+    width: 65vw;
+    min-width: 580px;
     height: 100%;
     position: relative;
     display: flex;
+    flex-direction: row;
+    justify-content: space-around; /* Spread items horizontally */
     align-items: center;
-    justify-content: center;
     perspective: 1000px;
     padding: 0 4rem;
 }
 
-/* Base style for Parallax Layers */
+/* Base style for Parallax Layers - relative to keep horizontal flow */
 .parallax-layer {
-    position: absolute;
+    position: relative;
     will-change: transform;
     transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 /* Midground Layer (Deep background / smaller) */
 .mid-layer {
     z-index: 5;
     transform: translate3d(var(--mid-x, 0px), var(--y-offset, -30px), -100px) scale(0.85);
-    opacity: 0.65;
+    opacity: 0.7;
     filter: blur(0.5px);
     transition: opacity 0.5s ease, filter 0.5s ease;
 }
@@ -1268,17 +1272,18 @@ body {
 /* Mobile responsive override */
 @media (max-width: 768px) {
     .artwork-wall {
-        width: 85vw;
-        min-width: 320px;
+        width: 135vw; /* Give generous horizontal width on mobile to display two items cleanly */
+        min-width: 480px;
         padding: 0 1.5rem;
+        justify-content: space-between; /* Maximum separation on mobile */
     }
     
     .mid-layer {
-        transform: translate3d(var(--mid-x, 0px), var(--y-offset, -45px), -80px) scale(0.78);
+        transform: translate3d(var(--mid-x, 0px), var(--y-offset, -40px), -60px) scale(0.82);
     }
     
     .fore-layer {
-        transform: translate3d(var(--fore-x, 0px), var(--y-offset, 55px), 30px) scale(1.02);
+        transform: translate3d(var(--fore-x, 0px), var(--y-offset, 50px), 30px) scale(1.0);
     }
 }
 

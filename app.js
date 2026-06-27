@@ -503,7 +503,11 @@ function generateGallery() {
     }
     
     let index = 1;
+    let wallIndex = 0;
     grouped.forEach(group => {
+        wallIndex++;
+        const isReverse = (wallIndex % 2 === 0);
+        
         const section = document.createElement('section');
         section.className = 'gallery-section artwork-wall dynamic-wall';
         section.setAttribute('data-zone', group.zone);
@@ -518,16 +522,17 @@ function generateGallery() {
         section.setAttribute('data-bg-night', colors.night);
         section.setAttribute('data-bg-day', colors.day);
         
-        let innerHtml = '';
+        let htmlA = '';
+        let htmlB = '';
         
         // Item 1: Midground (smaller, background)
         if (group.items[0]) {
             const keyA = group.items[0];
             const dataA = artworks[keyA];
             const wallNumA = String(index++).padStart(2, '0');
-            const offsetA = (index % 2 === 0) ? -40 : 40; // Zig-zag offsets
+            const offsetA = isReverse ? 40 : -40; // Zig-zag offsets
             
-            innerHtml += `
+            htmlA = `
                 <div class="parallax-layer mid-layer" style="--y-offset: ${offsetA}px;">
                     <div class="artwork-container">
                         <span class="wall-number">${wallNumA}</span>
@@ -551,11 +556,11 @@ function generateGallery() {
             const keyB = group.items[1];
             const dataB = artworks[keyB];
             const wallNumB = String(index++).padStart(2, '0');
-            const offsetB = (index % 2 === 0) ? 60 : -60; // Opposite offsets
+            const offsetB = isReverse ? -50 : 50; // Opposite offsets
             const frameStyles = ['frame-gold', 'frame-dark'];
             const frameClass = frameStyles[index % frameStyles.length];
             
-            innerHtml += `
+            htmlB = `
                 <div class="parallax-layer fore-layer" style="--y-offset: ${offsetB}px;">
                     <div class="artwork-container">
                         <span class="wall-number">${wallNumB}</span>
@@ -574,7 +579,8 @@ function generateGallery() {
             `;
         }
         
-        section.innerHTML = innerHtml;
+        // Swap flex rendering order alternatively to create a dynamic layout flow
+        section.innerHTML = isReverse ? (htmlB + htmlA) : (htmlA + htmlB);
         track.insertBefore(section, artistWall);
     });
     
