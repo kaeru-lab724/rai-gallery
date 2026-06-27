@@ -1,3 +1,9 @@
+// Global error catching for debugging
+window.onerror = function(message, source, lineno, colno, error) {
+    alert("JS Error: " + message + " at " + source + ":" + lineno);
+    return false;
+};
+
 // Artwork Database (Processed & Categorized by AI)
 const artworks = {
   "christmas-night-sky": {
