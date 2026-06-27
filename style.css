@@ -1224,67 +1224,157 @@ body {
    4. 3D PARALLAX GALLERY & GYROSCOPIC STYLES
    ========================================== */
 
-/* Artwork Wall redesigned to prevent overlaps and improve spacing */
+/* Artwork Wall - Redesigned to 1-column layout (no overlaps) */
 .artwork-wall {
-    width: 65vw;
-    min-width: 580px;
+    width: 48vw;
+    min-width: 420px;
     height: 100%;
     position: relative;
     display: flex;
-    flex-direction: row;
-    justify-content: space-around; /* Spread items horizontally */
+    justify-content: center;
     align-items: center;
-    perspective: 1000px;
     padding: 0 4rem;
+    /* Soft vertical zig-zag offset */
+    transform: translateY(var(--y-offset, 0px));
+    will-change: transform;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* Base style for Parallax Layers - relative to keep horizontal flow */
-.parallax-layer {
-    position: relative;
-    will-change: transform;
-    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+@media (max-width: 768px) {
+    .artwork-wall {
+        width: 82vw;
+        min-width: 290px;
+        padding: 0 2rem;
+    }
+}
+
+/* Entrance room selector cards */
+.room-selector-entrance {
+    margin-top: 2rem;
+    width: 100%;
+    max-width: 600px;
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 1rem;
 }
 
-/* Midground Layer (Deep background / smaller) */
-.mid-layer {
-    z-index: 5;
-    transform: translate3d(var(--mid-x, 0px), var(--y-offset, -30px), -100px) scale(0.85);
-    opacity: 0.7;
-    filter: blur(0.5px);
-    transition: opacity 0.5s ease, filter 0.5s ease;
+.selector-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
 }
 
-.mid-layer:hover {
-    opacity: 0.95;
-    filter: blur(0);
+.room-cards {
+    display: flex;
+    gap: 1.2rem;
+    width: 100%;
 }
 
-/* Foreground Layer (Near viewer / larger) */
-.fore-layer {
-    z-index: 10;
-    transform: translate3d(var(--fore-x, 0px), var(--y-offset, 40px), 50px) scale(1.05);
-    opacity: 1;
+.room-card-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    padding: 1.2rem 1rem;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.3rem;
 }
 
-/* Mobile responsive override */
-@media (max-width: 768px) {
-    .artwork-wall {
-        width: 135vw; /* Give generous horizontal width on mobile to display two items cleanly */
-        min-width: 480px;
-        padding: 0 1.5rem;
-        justify-content: space-between; /* Maximum separation on mobile */
-    }
-    
-    .mid-layer {
-        transform: translate3d(var(--mid-x, 0px), var(--y-offset, -40px), -60px) scale(0.82);
-    }
-    
-    .fore-layer {
-        transform: translate3d(var(--fore-x, 0px), var(--y-offset, 50px), 30px) scale(1.0);
-    }
+.room-card-title {
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #fff;
+    letter-spacing: 0.05em;
+}
+
+.room-card-sub {
+    font-family: var(--font-sans);
+    font-size: 0.6rem;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+/* Hover glow effect for each room card theme */
+.room-card-btn[data-select-room="water"]:hover {
+    background: rgba(26, 54, 110, 0.18);
+    border-color: rgba(74, 144, 226, 0.4);
+    box-shadow: 0 10px 25px rgba(74, 144, 226, 0.15);
+    transform: translateY(-4px);
+}
+
+.room-card-btn[data-select-room="forest"]:hover {
+    background: rgba(15, 23, 17, 0.18);
+    border-color: rgba(144, 210, 160, 0.4);
+    box-shadow: 0 10px 25px rgba(144, 210, 160, 0.15);
+    transform: translateY(-4px);
+}
+
+.room-card-btn[data-select-room="stars"]:hover {
+    background: rgba(18, 12, 24, 0.18);
+    border-color: rgba(220, 180, 240, 0.4);
+    box-shadow: 0 10px 25px rgba(220, 180, 240, 0.15);
+    transform: translateY(-4px);
+}
+
+/* Header Room Navigation Tabs styling */
+.room-navigation-tabs {
+    display: flex;
+    gap: 0.8rem;
+    background: rgba(0, 0, 0, 0.25);
+    padding: 0.3rem;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(10px);
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.45rem 1.2rem;
+    border-radius: 20px;
+    font-family: 'Noto Serif JP', serif;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.4);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+}
+
+.tab-btn:hover {
+    color: #fff;
+}
+
+.tab-btn.active {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    box-shadow: inset 0 1px 3px rgba(255, 255, 255, 0.05);
+}
+
+/* UI controls alignment fix for tab addition */
+.ui-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: calc(100% - 6rem);
+    max-width: 1200px;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 2rem;
+}
+
+.control-actions {
+    display: flex;
+    gap: 1rem;
 }
 
 /* Gyroscope dynamic glass reflection */

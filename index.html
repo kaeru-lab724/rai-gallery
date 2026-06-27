@@ -57,20 +57,45 @@
                 <span class="btn-text">展覧会に入場する</span>
                 <span class="btn-subtext">ENTER GALLERY</span>
             </button>
+
+            <div class="room-selector-entrance">
+                <span class="selector-title">展示室を選んで入る</span>
+                <div class="room-cards">
+                    <button class="room-card-btn" data-select-room="water">
+                        <span class="room-card-title">水底の展示室</span>
+                        <span class="room-card-sub">Deep Water</span>
+                    </button>
+                    <button class="room-card-btn" data-select-room="forest">
+                        <span class="room-card-title">木漏れ日の森</span>
+                        <span class="room-card-sub">Quiet Forest</span>
+                    </button>
+                    <button class="room-card-btn" data-select-room="stars">
+                        <span class="room-card-title">星夜のテラス</span>
+                        <span class="room-card-sub">Starry Night</span>
+                    </button>
+                </div>
+            </div>
         </div>
         <div class="entrance-bg-texture"></div>
     </section>
 
     <!-- FLOATING UI CONTROLS -->
     <div id="ui-controls" class="ui-controls hide">
-        <button id="btn-theme" class="control-btn" title="テーマ切り替え">
-            <i class="fa-solid fa-moon"></i>
-            <span class="btn-label">Night Mode</span>
-        </button>
-        <button id="btn-audio" class="control-btn" title="環境音再生">
-            <i class="fa-solid fa-volume-xmark"></i>
-            <span class="btn-label">Sound Off</span>
-        </button>
+        <div class="room-navigation-tabs">
+            <button class="tab-btn active" data-room="water">水底の展示室</button>
+            <button class="tab-btn" data-room="forest">木漏れ日の森</button>
+            <button class="tab-btn" data-room="stars">星夜のテラス</button>
+        </div>
+        <div class="control-actions">
+            <button id="btn-theme" class="control-btn" title="テーマ切り替え">
+                <i class="fa-solid fa-moon"></i>
+                <span class="btn-label">Night Mode</span>
+            </button>
+            <button id="btn-audio" class="control-btn" title="環境音再生">
+                <i class="fa-solid fa-volume-xmark"></i>
+                <span class="btn-label">Sound Off</span>
+            </button>
+        </div>
     </div>
 
     <!-- 2. MAIN GALLERY (Horizontal Scroll) -->

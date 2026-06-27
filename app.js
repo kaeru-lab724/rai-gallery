@@ -3,7 +3,7 @@ const artworks = {
   "christmas-night-sky": {
     "title": "クリスマスの夜空に",
     "meta": "2024 | 水彩、紙 | 297 x 210 mm",
-    "desc": "静かなクリスマスの夜、満天の星空をサンタクロースとトナカイたちが駆け抜けていきます。深い藍色と細かな星屑が織りなす夜空の質感が、温かみのある光を優しく引き立てています。",
+    "desc": "静かなクリスマスの夜、満天 of 星空をサンタクロースとトナカイたちが駆け抜けていきます。深い藍色と細かな星屑が織りなす夜空の質感が、温かみのある光を優しく引き立てています。",
     "image": "assets/images/24年、クリスマスの夜空に.webp",
     "auraColor": "rgba(26, 54, 110, 0.4)",
     "zone": "stars",
@@ -147,7 +147,7 @@ const artworks = {
   "tiger-pen": {
     "title": "トラ",
     "meta": "2025 | ペン・色鉛筆、紙 | 297 x 210 mm",
-    "desc": "横顔を見せるトラ의 細密なペン画に、色鉛筆の柔らかな橙色が重ねられています。瞳の先できらきらと輝く金色の光の粒が、野性的な力強さの中にファンタジーの香りを漂わせています。",
+    "desc": "横顔を見せるトラの細密なペン画に、色鉛筆の柔らかな橙色が重ねられています。瞳の先できらきらと輝く金色の光の粒が、野性的な力強さの中にファンタジーの香りを漂わせています。",
     "image": "assets/images/トラ＿ペン.webp",
     "auraColor": "rgba(232, 140, 74, 0.4)",
     "zone": "forest",
@@ -407,8 +407,9 @@ const artworks = {
   }
 };
 
-const artworkKeys = Object.keys(artworks);
+const artworkKeys = [];
 let currentArtworkKey = '';
+let selectedRoomZone = 'water'; // Default active room
 
 // DOM Elements
 const entrance = document.getElementById('entrance');
@@ -443,144 +444,74 @@ let mainFilterNode = null;
 let starChimeGain = null;
 let starChimeInterval = null;
 
-// Room transition tracking flags
-let currentZone = 'water';
 let isTransitioning = false;
-const zoneLimits = {
-    'water': 0,
-    'forest': 0,
-    'stars': 0
-};
 
-// Dynamic Gallery Generation
-function generateGallery() {
+// Dynamic Gallery Generation (Filtered by selected zone)
+function generateGallery(zoneFilter) {
     const track = document.getElementById('gallery-track');
     if (!track) return;
     
-    // Select the end marker (Artist profile wall)
+    // Select constant boundary walls (Intro, Artist, Shop)
+    const introWall = track.querySelector('.intro-wall');
     const artistWall = track.querySelector('.artist-wall');
     if (!artistWall) return;
     
-    // Clean dynamic walls if exist
+    // Clean old dynamic walls if exist
     const oldWalls = track.querySelectorAll('.dynamic-wall');
     oldWalls.forEach(w => w.remove());
     
-    // Sort keys based on zone order: water -> forest -> stars
-    const sortedKeys = Object.keys(artworks).sort((a, b) => {
-        const zones = { 'water': 1, 'forest': 2, 'stars': 3 };
-        return zones[artworks[a].zone] - zones[artworks[b].zone];
-    });
+    // Filter artworks based on the selected exhibition room
+    const filteredKeys = Object.keys(artworks).filter(key => artworks[key].zone === zoneFilter);
     
-    // Synchronize artwork keys list for lightbox sliding navigation
+    // Synchronize keys for lightbox slider navigation within this room
     artworkKeys.length = 0;
-    artworkKeys.push(...sortedKeys);
-    
-    // Group artworks in pairs to build double-hanging walls
-    const grouped = [];
-    let currentGroup = [];
-    let activeZone = '';
-    
-    sortedKeys.forEach(key => {
-        const data = artworks[key];
-        if (activeZone !== data.zone) {
-            // Push remaining from previous zone
-            if (currentGroup.length > 0) {
-                grouped.push({ zone: activeZone, items: currentGroup });
-                currentGroup = [];
-            }
-            activeZone = data.zone;
-        }
-        currentGroup.push(key);
-        // Pair structure: max 2 items per wall
-        if (currentGroup.length === 2) {
-            grouped.push({ zone: activeZone, items: currentGroup });
-            currentGroup = [];
-        }
-    });
-    // Push the very last remaining item
-    if (currentGroup.length > 0) {
-        grouped.push({ zone: activeZone, items: currentGroup });
-    }
+    artworkKeys.push(...filteredKeys);
     
     let index = 1;
-    let wallIndex = 0;
-    grouped.forEach(group => {
-        wallIndex++;
-        const isReverse = (wallIndex % 2 === 0);
+    filteredKeys.forEach(key => {
+        const data = artworks[key];
+        const wallNumber = String(index).padStart(2, '0');
         
-        const section = document.createElement('section');
-        section.className = 'gallery-section artwork-wall dynamic-wall';
-        section.setAttribute('data-zone', group.zone);
+        // Soft vertical zig-zag offset to create high-low rhythm (Never overlaps!)
+        const yOffset = (index % 2 === 0) ? 35 : -35;
+        index++;
         
-        // Define zone color mappings for dynamic backdrop interpolation
+        // Cycle frame borders
+        const frames = ['frame-wooden', 'frame-gold', 'frame-dark'];
+        const frameClass = frames[index % frames.length];
+        
+        // Define zone color attributes for this room's wall backdrop
         const bgColors = {
             'water': { night: '#090d16', day: '#d9e2ec' },
             'forest': { night: '#0f1711', day: '#dfe5e0' },
             'stars': { night: '#120c18', day: '#eae4e9' }
         };
-        const colors = bgColors[group.zone] || bgColors['forest'];
+        const colors = bgColors[zoneFilter] || bgColors['forest'];
+        
+        const section = document.createElement('section');
+        section.className = 'gallery-section artwork-wall dynamic-wall';
+        section.setAttribute('data-artwork', key);
         section.setAttribute('data-bg-night', colors.night);
         section.setAttribute('data-bg-day', colors.day);
+        section.style.setProperty('--y-offset', `${yOffset}px`);
         
-        let htmlA = '';
-        let htmlB = '';
-        
-        // Item 1: Midground (smaller, background)
-        if (group.items[0]) {
-            const keyA = group.items[0];
-            const dataA = artworks[keyA];
-            const wallNumA = String(index++).padStart(2, '0');
-            const offsetA = isReverse ? 40 : -40; // Zig-zag offsets
-            
-            htmlA = `
-                <div class="parallax-layer mid-layer" style="--y-offset: ${offsetA}px;">
-                    <div class="artwork-container">
-                        <span class="wall-number">${wallNumA}</span>
-                        <div class="frame frame-wooden clickable-frame" onclick="openLightbox('${keyA}')">
-                            <div class="artwork-wrapper">
-                                <img src="${dataA.image}" alt="${dataA.title}" class="gallery-image" loading="lazy">
-                                <div class="glass-reflection"></div>
-                            </div>
-                        </div>
-                        <div class="museum-plaque">
-                            <h4 class="artwork-title">${dataA.title}</h4>
-                            <p class="artwork-meta">${dataA.meta}</p>
-                        </div>
+        section.innerHTML = `
+            <div class="artwork-container">
+                <span class="wall-number">${wallNumber}</span>
+                <div class="frame ${frameClass} clickable-frame" onclick="openLightbox('${key}')">
+                    <div class="artwork-wrapper">
+                        <img src="${data.image}" alt="${data.title}" class="gallery-image" loading="lazy">
+                        <div class="glass-reflection"></div>
                     </div>
                 </div>
-            `;
-        }
-        
-        // Item 2: Foreground (larger, foreground)
-        if (group.items[1]) {
-            const keyB = group.items[1];
-            const dataB = artworks[keyB];
-            const wallNumB = String(index++).padStart(2, '0');
-            const offsetB = isReverse ? -50 : 50; // Opposite offsets
-            const frameStyles = ['frame-gold', 'frame-dark'];
-            const frameClass = frameStyles[index % frameStyles.length];
-            
-            htmlB = `
-                <div class="parallax-layer fore-layer" style="--y-offset: ${offsetB}px;">
-                    <div class="artwork-container">
-                        <span class="wall-number">${wallNumB}</span>
-                        <div class="frame ${frameClass} clickable-frame" onclick="openLightbox('${keyB}')">
-                            <div class="artwork-wrapper">
-                                <img src="${dataB.image}" alt="${dataB.title}" class="gallery-image" loading="lazy">
-                                <div class="glass-reflection"></div>
-                            </div>
-                        </div>
-                        <div class="museum-plaque">
-                            <h4 class="artwork-title">${dataB.title}</h4>
-                            <p class="artwork-meta">${dataB.meta}</p>
-                        </div>
-                    </div>
+                <div class="museum-plaque">
+                    <h4 class="artwork-title">${data.title}</h4>
+                    <p class="artwork-meta">${data.meta}</p>
+                    <span class="view-hint">Click to examine</span>
                 </div>
-            `;
-        }
+            </div>
+        `;
         
-        // Swap flex rendering order alternatively to create a dynamic layout flow
-        section.innerHTML = isReverse ? (htmlB + htmlA) : (htmlA + htmlB);
         track.insertBefore(section, artistWall);
     });
     
@@ -598,46 +529,128 @@ function generateGallery() {
     }
 }
 
-// 1. Entrance Handler
+// Room transition logic (Triggers ink stain and swaps database)
+function switchRoom(newZone) {
+    if (isTransitioning || selectedRoomZone === newZone) return;
+    isTransitioning = true;
+    
+    const overlay = document.getElementById('room-transition-overlay');
+    if (!overlay) return;
+    
+    // Map overlay theme color
+    const transitionColors = {
+        'water': 'rgba(26, 54, 110, 0.95)',
+        'forest': 'rgba(40, 75, 55, 0.95)',
+        'stars': 'rgba(50, 30, 70, 0.95)'
+    };
+    const stainColor = transitionColors[newZone] || 'rgba(0, 0, 0, 0.95)';
+    overlay.style.setProperty('--transition-color', stainColor);
+    
+    // 1. Splash ink stain
+    overlay.classList.add('show-transition');
+    
+    setTimeout(() => {
+        // 2. Perform DOM swap inside the ink block
+        selectedRoomZone = newZone;
+        generateGallery(newZone);
+        
+        // Reset scroll position to the front of the new room
+        galleryContainer.scrollLeft = 0;
+        
+        // Synchronize Active states on Navigation Tabs
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if (btn.getAttribute('data-room') === newZone) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        
+        // Synchronize ambient synthesizer parameters to match new room
+        updateAmbientSynthForRoom(newZone);
+        updateBackdropAndSound();
+    }, 850);
+    
+    setTimeout(() => {
+        // 3. Clear ink stain
+        overlay.classList.remove('show-transition');
+        isTransitioning = false;
+    }, 1800);
+}
+
+// Update Audio settings instantly for the current exhibition room
+function updateAmbientSynthForRoom(zone) {
+    if (!audioCtx || !isPlaying) return;
+    
+    const freqs = {
+        'water': 175,
+        'forest': 325,
+        'stars': 480
+    };
+    const targetCutoff = freqs[zone] || 220;
+    
+    if (mainFilterNode) {
+        mainFilterNode.frequency.setValueAtTime(targetCutoff, audioCtx.currentTime);
+    }
+    
+    if (starChimeGain) {
+        // Chimes active in forest (soft) and stars (bright), silent in water
+        const gains = {
+            'water': 0.0,
+            'forest': 0.15,
+            'stars': 0.45
+        };
+        const targetGain = gains[zone] !== undefined ? gains[zone] : 0.0;
+        starChimeGain.gain.setValueAtTime(targetGain, audioCtx.currentTime);
+    }
+}
+
+// 1. Entrance click handlers (supports direct select room or default enter)
 btnEnter.addEventListener('click', () => {
+    startEntranceFlow('water');
+});
+
+document.querySelectorAll('.room-card-btn').forEach(card => {
+    card.addEventListener('click', (e) => {
+        const room = card.getAttribute('data-select-room');
+        if (room) startEntranceFlow(room);
+    });
+});
+
+function startEntranceFlow(zone) {
+    selectedRoomZone = zone;
+    
     entrance.classList.add('fade-out');
     galleryContainer.classList.remove('hide');
     uiControls.classList.remove('hide');
+    
+    // Sync tabs status
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        if (btn.getAttribute('data-room') === zone) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
     
     setTimeout(() => {
         entrance.style.display = 'none';
         galleryContainer.classList.add('show');
         uiControls.classList.add('show');
         
-        // Initial backdrop colors and sound state alignment
+        // Build selected room gallery dynamically
+        generateGallery(selectedRoomZone);
         updateBackdropAndSound();
-        calculateZoneBoundaries();
     }, 1200);
-});
-
-// Calculate pixel scroll boundaries for room transitions
-function calculateZoneBoundaries() {
-    const walls = Array.from(document.querySelectorAll('.artwork-wall'));
-    if (walls.length === 0) return;
-    
-    let lastWaterIdx = -1;
-    let lastForestIdx = -1;
-    
-    walls.forEach((wall, idx) => {
-        const zone = wall.getAttribute('data-zone');
-        if (zone === 'water') lastWaterIdx = idx;
-        if (zone === 'forest') lastForestIdx = idx;
-    });
-    
-    const containerWidth = galleryContainer.clientWidth;
-    
-    if (lastWaterIdx !== -1 && walls[lastWaterIdx]) {
-        zoneLimits['water'] = walls[lastWaterIdx].offsetLeft + walls[lastWaterIdx].offsetWidth - containerWidth / 2;
-    }
-    if (lastForestIdx !== -1 && walls[lastForestIdx]) {
-        zoneLimits['forest'] = walls[lastForestIdx].offsetLeft + walls[lastForestIdx].offsetWidth - containerWidth / 2;
-    }
 }
+
+// Room navigation tabs click handlers
+document.querySelectorAll('.tab-btn').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const room = tab.getAttribute('data-room');
+        if (room) switchRoom(room);
+    });
+});
 
 // 2. Horizontal Scrolling (converts vertical wheel scrolling to horizontal scroll)
 galleryContainer.addEventListener('wheel', (e) => {
@@ -668,17 +681,15 @@ window.addEventListener('deviceorientation', (e) => {
     
     if (beta === null || gamma === null) return;
     
-    // Smooth using simple LERP filter
     const smoothBeta = lastBeta + (beta - lastBeta) * 0.15;
     const smoothGamma = lastGamma + (gamma - lastGamma) * 0.15;
     
     lastBeta = smoothBeta;
     lastGamma = smoothGamma;
     
-    // Map to offset pixels (-30px to 30px)
-    const gyroX = Math.max(-30, Math.min(30, smoothGamma * 0.7));
-    // Assume user holds phone tilted at 50 degrees naturally
-    const gyroY = Math.max(-30, Math.min(30, (smoothBeta - 50) * 0.7));
+    // Map to offset pixels (-25px to 25px)
+    const gyroX = Math.max(-25, Math.min(25, smoothGamma * 0.6));
+    const gyroY = Math.max(-25, Math.min(25, (smoothBeta - 50) * 0.6));
     
     document.documentElement.style.setProperty('--gyro-x', `${gyroX}px`);
     document.documentElement.style.setProperty('--gyro-y', `${gyroY}px`);
@@ -697,7 +708,6 @@ btnTheme.addEventListener('click', () => {
         btnTheme.innerHTML = `<i class="fa-solid fa-moon"></i><span class="btn-label">Night Mode</span>`;
     }
     
-    // Recalculate backdrop blending for the active theme
     updateBackdropAndSound();
 });
 
@@ -705,37 +715,28 @@ btnTheme.addEventListener('click', () => {
 function initAmbientSynth() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
-    // Low pass filter for soft/warm default tones
     mainFilterNode = audioCtx.createBiquadFilter();
     mainFilterNode.type = 'lowpass';
-    mainFilterNode.frequency.setValueAtTime(220, audioCtx.currentTime); // start deep/muffled
+    mainFilterNode.frequency.setValueAtTime(220, audioCtx.currentTime);
     mainFilterNode.Q.setValueAtTime(1.2, audioCtx.currentTime);
 
-    // Master volume
     const masterGain = audioCtx.createGain();
-    masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime); // start silent
+    masterGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
 
-    // Frequencies representing C major 9 chord (C3, G3, B3, D4, G4)
     const freqs = [130.81, 196.00, 246.94, 293.66, 392.00];
     
-    // Create oscillators
     freqs.forEach((freq, idx) => {
         const osc = audioCtx.createOscillator();
         const oscGain = audioCtx.createGain();
         
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-        
-        // Slight detune for chorus warmth
         osc.detune.setValueAtTime((Math.random() - 0.5) * 8, audioCtx.currentTime);
-        
-        // Individual gains
         oscGain.gain.setValueAtTime(0.06 / freqs.length, audioCtx.currentTime);
         
-        // Slow volume LFO to make the chord breathe
         const lfo = audioCtx.createOscillator();
         const lfoGain = audioCtx.createGain();
-        lfo.frequency.setValueAtTime(0.05 + idx * 0.02, audioCtx.currentTime); // very slow
+        lfo.frequency.setValueAtTime(0.05 + idx * 0.02, audioCtx.currentTime);
         lfoGain.gain.setValueAtTime(0.02, audioCtx.currentTime);
         
         lfo.connect(lfoGain);
@@ -750,15 +751,13 @@ function initAmbientSynth() {
         synthNodes.push(osc, lfo);
     });
     
-    // Starry night high chime generator gain node
     starChimeGain = audioCtx.createGain();
-    starChimeGain.gain.setValueAtTime(0.0, audioCtx.currentTime); // initially silent in water zone
+    starChimeGain.gain.setValueAtTime(0.0, audioCtx.currentTime);
     starChimeGain.connect(audioCtx.destination);
     
     mainFilterNode.connect(masterGain);
     masterGain.connect(audioCtx.destination);
     
-    // Start background random chime generation
     startStarChimeLoop();
     
     return masterGain;
@@ -776,21 +775,14 @@ btnAudio.addEventListener('click', () => {
     }
     
     if (!isPlaying) {
-        // Fade sound in
         masterGainNode.gain.linearRampToValueAtTime(0.4, audioCtx.currentTime + 2.0);
         btnAudio.innerHTML = `<i class="fa-solid fa-volume-high"></i><span class="btn-label">Sound On</span>`;
         isPlaying = true;
         
-        // Immediately sync parameters to current scroll position
         setTimeout(() => {
-            if (galleryContainer) {
-                const scrollLeft = galleryContainer.scrollLeft;
-                const maxScroll = galleryContainer.scrollWidth - galleryContainer.clientWidth;
-                updateAmbientSynth(scrollLeft, maxScroll);
-            }
+            updateAmbientSynthForRoom(selectedRoomZone);
         }, 100);
     } else {
-        // Fade sound out
         masterGainNode.gain.linearRampToValueAtTime(0.0, audioCtx.currentTime + 1.0);
         btnAudio.innerHTML = `<i class="fa-solid fa-volume-xmark"></i><span class="btn-label">Sound Off</span>`;
         isPlaying = false;
@@ -956,7 +948,8 @@ function startStarChimeLoop() {
     starChimeInterval = setInterval(() => {
         if (!audioCtx || audioCtx.state === 'suspended' || !isPlaying) return;
         
-        if (Math.random() > 0.45) {
+        // Twinkling chime trigger logic (Only active in stars and forest room)
+        if (selectedRoomZone !== 'water' && Math.random() > 0.45) {
             const scale = [783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98];
             const randomFreq = scale[Math.floor(Math.random() * scale.length)];
             
@@ -979,114 +972,6 @@ function startStarChimeLoop() {
             osc.stop(now + 3.9);
         }
     }, 1500);
-}
-
-function updateAmbientSynth(scrollLeft, maxScroll) {
-    if (!audioCtx || !isPlaying) return;
-    
-    const ratio = maxScroll > 0 ? scrollLeft / maxScroll : 0;
-    
-    const minFreq = 170;
-    const maxFreq = 480;
-    const targetFreq = minFreq + (maxFreq - minFreq) * ratio;
-    
-    if (mainFilterNode) {
-        mainFilterNode.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.4);
-    }
-    
-    if (starChimeGain) {
-        let chimeVol = 0;
-        if (ratio > 0.5) {
-            chimeVol = (ratio - 0.5) * 2;
-        }
-        starChimeGain.gain.setTargetAtTime(chimeVol * 0.5, audioCtx.currentTime, 0.4);
-    }
-}
-
-// Perform 3D parallax on scroll
-function updateParallax() {
-    const walls = document.querySelectorAll('.dynamic-wall');
-    const containerWidth = galleryContainer.clientWidth;
-    const scrollLeft = galleryContainer.scrollLeft;
-    
-    walls.forEach(wall => {
-        const wallStart = wall.offsetLeft;
-        const wallWidth = wall.offsetWidth;
-        const wallCenter = wallStart + wallWidth / 2;
-        const scrollCenter = scrollLeft + containerWidth / 2;
-        
-        // Relative distance from viewport center (-1.0 to 1.0)
-        const distance = (scrollCenter - wallCenter) / (containerWidth / 2);
-        
-        if (Math.abs(distance) < 2) {
-            const midLayer = wall.querySelector('.mid-layer');
-            const foreLayer = wall.querySelector('.fore-layer');
-            
-            if (midLayer) {
-                // Move midground slower (opposite to scroll direction)
-                const midX = distance * -30; 
-                midLayer.style.setProperty('--mid-x', `${midX}px`);
-            }
-            if (foreLayer) {
-                // Move foreground faster (in scroll direction)
-                const foreX = distance * 40;
-                foreLayer.style.setProperty('--fore-x', `${foreX}px`);
-            }
-        }
-    });
-}
-
-// Handle room changes via ink overlay transitions
-function checkRoomTransitions(scrollLeft) {
-    if (isTransitioning) return;
-    
-    const overlay = document.getElementById('room-transition-overlay');
-    if (!overlay) return;
-    
-    let targetZone = '';
-    let targetScroll = 0;
-    let transitionColor = 'rgba(144, 210, 220, 0.95)'; // water -> forest (greenish blue)
-    
-    if (currentZone === 'water' && scrollLeft > zoneLimits['water'] && zoneLimits['water'] > 0) {
-        targetZone = 'forest';
-        targetScroll = zoneLimits['water'] + 250;
-        transitionColor = 'rgba(144, 210, 220, 0.95)';
-    } else if (currentZone === 'forest' && scrollLeft > zoneLimits['forest'] && zoneLimits['forest'] > 0) {
-        targetZone = 'stars';
-        targetScroll = zoneLimits['forest'] + 250;
-        transitionColor = 'rgba(220, 180, 240, 0.95)'; // forest -> stars (purple/magenta)
-    } else if (currentZone === 'forest' && scrollLeft < zoneLimits['water'] && zoneLimits['water'] > 0) {
-        targetZone = 'water';
-        targetScroll = zoneLimits['water'] - 200;
-        transitionColor = 'rgba(144, 210, 220, 0.95)';
-    } else if (currentZone === 'stars' && scrollLeft < zoneLimits['forest'] && zoneLimits['forest'] > 0) {
-        targetZone = 'forest';
-        targetScroll = zoneLimits['forest'] - 200;
-        transitionColor = 'rgba(220, 180, 240, 0.95)';
-    }
-    
-    if (targetZone) {
-        isTransitioning = true;
-        currentZone = targetZone;
-        
-        // Trigger overlay ink stain bleed animation
-        overlay.style.setProperty('--transition-color', transitionColor);
-        overlay.classList.add('show-transition');
-        
-        setTimeout(() => {
-            // Jump container scroll inside the ink stain
-            galleryContainer.scrollTo({
-                left: targetScroll,
-                behavior: 'auto'
-            });
-            updateBackdropAndSound();
-        }, 800);
-        
-        setTimeout(() => {
-            overlay.classList.remove('show-transition');
-            isTransitioning = false;
-        }, 1800);
-    }
 }
 
 function updateBackdropAndSound() {
@@ -1159,19 +1044,11 @@ function updateBackdropAndSound() {
         galleryContainer.style.backgroundColor = blendedColor;
         document.documentElement.style.setProperty('--wall-color', blendedColor);
     }
-    
-    const maxScroll = galleryContainer.scrollWidth - containerWidth;
-    updateAmbientSynth(scrollLeft, maxScroll);
-    updateParallax();
-    checkRoomTransitions(scrollLeft);
 }
 
 // Bind scrolling and resizing events to trigger updates
 galleryContainer.addEventListener('scroll', updateBackdropAndSound);
-window.addEventListener('resize', () => {
-    updateBackdropAndSound();
-    calculateZoneBoundaries();
-});
+window.addEventListener('resize', updateBackdropAndSound);
 
 // Loader Control Simulation
 function initLoader() {
@@ -1212,6 +1089,5 @@ window.navigateArtwork = navigateArtwork;
 
 // Safely generate gallery and launch loader when DOM is fully prepared
 window.addEventListener('DOMContentLoaded', () => {
-    generateGallery();
     initLoader();
 });
