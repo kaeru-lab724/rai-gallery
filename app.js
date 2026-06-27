@@ -18,7 +18,7 @@ const artworks = {
   "ohanami-picnic": {
     "title": "お花見ピクニック",
     "meta": "2026 | 水彩、紙 | 297 x 210 mm",
-    "desc": "満開 of 桜の下で、仲良くお花見を楽しむ二匹の猫たちの姿が描かれています。柔らかなピンクと緑の色彩が、春のうららかな陽気とお弁当を囲む優しい時間を伝えてくれます。",
+    "desc": "満開の桜の下で、仲良くお花見を楽しむ二匹の猫たちの姿が描かれています。柔らかなピンクと緑の色彩が、春のうららかな陽気とお弁当を囲む優しい時間を伝えてくれます。",
     "image": "assets/images/26_お花見ピクニック.webp",
     "auraColor": "rgba(255, 209, 220, 0.4)",
     "zone": "forest",
@@ -171,7 +171,7 @@ const artworks = {
   "picnic-and-rabbit": {
     "title": "ピクニックとうさぎ",
     "meta": "2024 | 水彩、紙 | 297 x 210 mm",
-    "desc": "緑のスカートと白いブラウスを着て、小さなピクニックバスケットを持った愛らしいうさぎさん。背景を彩る野の花やブルーベリーが、春のピクニックのわくわくする雰囲気を優しく引き立てています。",
+    "desc": "緑のスカートと白いブラウスを着て、小さなピクニックバスケットを持った愛らしうさぎさん。背景を彩る野の花やブルーベリーが、春のピクニックのわくわくする雰囲気を優しく引き立てています。",
     "image": "assets/images/ピクニックとうさぎ.webp",
     "auraColor": "rgba(144, 210, 160, 0.4)",
     "zone": "forest",
@@ -216,7 +216,7 @@ const artworks = {
   "playground-of-squirrels": {
     "title": "リス達の遊び場所",
     "meta": "2024 | 水彩、紙 | 297 x 210 mm",
-    "desc": "吊り下げられた美しい青い陶器の植木鉢の中で、嬉しそうに遊ぶ二匹のリス。背景に広がる爽やかなミントグリーンと赤や青の色彩が、木漏れ日あふれる庭先の穏やかな一日を感じさせます。",
+    "desc": "吊り下げられた美しい青い陶器の植木鉢の中で、嬉しそうに遊ぶ二匹のリス。背景に広がる爽やかなミントグリーン and 赤や青の色彩が、木漏れ日あふれる庭先の穏やかな一日を感じさせます。",
     "image": "assets/images/リス達の遊び場所.webp",
     "auraColor": "rgba(168, 218, 220, 0.4)",
     "zone": "forest",
@@ -306,7 +306,7 @@ const artworks = {
   "profile-cat": {
     "title": "横向きの猫",
     "meta": "2023 | 水彩、紙 | 297 x 210 mm",
-    "desc": "美しい横顔を見せる長毛の猫。水彩の淡いレインボーカラーが毛並みに重なり、周囲に描かれた繊細なアラベスク模様のような草花のラインが、夢の中のような優しい世界観を醸し出しています。",
+    "desc": "美しい横顔を見せる長毛の猫。水彩の淡いレインボーカラーが横向きの猫に重なり、周囲に描かれた繊細なアラベスク模様のような草花のラインが、夢の中のような優しい世界観を醸し出しています。",
     "image": "assets/images/横向きの猫.webp",
     "auraColor": "rgba(245, 220, 180, 0.4)",
     "zone": "forest",
@@ -342,7 +342,7 @@ const artworks = {
   "green-eyed-cat-1007": {
     "title": "緑の瞳の猫",
     "meta": "2025 | ペン・水彩、紙 | 210 x 297 mm",
-    "desc": "鮮やかで透き通るような緑 of 瞳をした猫が、こちらを静かに見つめています。淡いグリーンの水彩画が、瑞々しく穏やかな森の木漏れ日のような癒やしを与えてくれます。",
+    "desc": "鮮やかで透き通るような緑の瞳をした猫が、こちらを静かに見つめています。淡いグリーンの水彩画が、瑞々しく穏やかな森の木漏れ日のような癒やしを与えてくれます。",
     "image": "assets/images/猫25,10,7.webp",
     "auraColor": "rgba(140, 215, 180, 0.4)",
     "zone": "forest",
@@ -405,15 +405,13 @@ const artworks = {
   "bouquet-of-roses": {
     "title": "薔薇の花束",
     "meta": "2024 | 水彩、紙 | 297 x 210 mm",
-    "desc": "赤、青、黄、白などカラフルな薔薇の花々が束ねられた美しい花束。ヴィンテージ風のタグと指輪があしらわれ、深みのある夜空のような青い背景が、静かでロマンチックな物語を想起させます。",
+    "desc": "赤、青、黄、白などカラフルな薔薇の花々が飾られ、ヴィンテージのタグと指輪があしらわれ、深みのある夜空のような青い背景が、静かでロマンチックな物語を想起させます。",
     "image": "assets/images/薔薇の花束.webp",
     "auraColor": "rgba(90, 100, 160, 0.4)",
     "zone": "forest",
     "suzuriUrl": "#"
   }
 };
-
-;
 
 const artworkKeys = Object.keys(artworks);
 let currentArtworkKey = '';
@@ -450,6 +448,83 @@ let isPlaying = false;
 let mainFilterNode = null;
 let starChimeGain = null;
 let starChimeInterval = null;
+
+// Dynamic Gallery Generation
+function generateGallery() {
+    const track = document.getElementById('gallery-track');
+    if (!track) return;
+    
+    // Select the end marker (Artist profile wall)
+    const artistWall = track.querySelector('.artist-wall');
+    if (!artistWall) return;
+    
+    // Sort keys based on zone order: water -> forest -> stars
+    const sortedKeys = Object.keys(artworks).sort((a, b) => {
+        const zones = { 'water': 1, 'forest': 2, 'stars': 3 };
+        return zones[artworks[a].zone] - zones[artworks[b].zone];
+    });
+    
+    // Synchronize artwork keys list for lightbox sliding navigation
+    artworkKeys.length = 0;
+    artworkKeys.push(...sortedKeys);
+    
+    let index = 1;
+    sortedKeys.forEach(key => {
+        const data = artworks[key];
+        const wallNumber = String(index).padStart(2, '0');
+        index++;
+        
+        // Cycle frame borders
+        const frames = ['frame-wooden', 'frame-gold', 'frame-dark'];
+        const frameClass = frames[index % frames.length];
+        
+        // Define zone color mappings for dynamic backdrop interpolation
+        const bgColors = {
+            'water': { night: '#090d16', day: '#d9e2ec' },
+            'forest': { night: '#0f1711', day: '#dfe5e0' },
+            'stars': { night: '#120c18', day: '#eae4e9' }
+        };
+        const colors = bgColors[data.zone] || bgColors['forest'];
+        
+        const section = document.createElement('section');
+        section.className = 'gallery-section artwork-wall';
+        section.setAttribute('data-artwork', key);
+        section.setAttribute('data-bg-night', colors.night);
+        section.setAttribute('data-bg-day', colors.day);
+        
+        section.innerHTML = `
+            <div class="artwork-container">
+                <span class="wall-number">${wallNumber}</span>
+                <div class="frame ${frameClass} clickable-frame" onclick="openLightbox('${key}')">
+                    <div class="artwork-wrapper">
+                        <img src="${data.image}" alt="${data.title}" class="gallery-image" loading="lazy">
+                        <div class="glass-reflection"></div>
+                    </div>
+                </div>
+                <div class="museum-plaque">
+                    <h4 class="artwork-title">${data.title}</h4>
+                    <p class="artwork-meta">${data.meta}</p>
+                    <span class="view-hint">Click to examine</span>
+                </div>
+            </div>
+        `;
+        
+        track.insertBefore(section, artistWall);
+    });
+    
+    // Update shop numbers to be dynamic after list
+    const shopWall = track.querySelector('.shop-wall');
+    if (shopWall) {
+        const shopWallNum = shopWall.querySelector('.wall-number');
+        if (shopWallNum) {
+            shopWallNum.textContent = String(index + 1).padStart(2, '0');
+        }
+    }
+    const artistWallNum = artistWall.querySelector('.wall-number');
+    if (artistWallNum) {
+        artistWallNum.textContent = String(index).padStart(2, '0');
+    }
+}
 
 // 1. Entrance Handler
 btnEnter.addEventListener('click', () => {
@@ -933,5 +1008,8 @@ function initLoader() {
     }, 150);
 }
 
-// Start loader sequence on load
-initLoader();
+// Safely generate gallery and launch loader when DOM is fully prepared
+window.addEventListener('DOMContentLoaded', () => {
+    generateGallery();
+    initLoader();
+});
