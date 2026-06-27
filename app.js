@@ -1,9 +1,3 @@
-// Global error catching for debugging
-window.onerror = function(message, source, lineno, colno, error) {
-    alert("JS Error: " + message + " at " + source + ":" + lineno);
-    return false;
-};
-
 // Artwork Database (Processed & Categorized by AI)
 const artworks = {
   "christmas-night-sky": {
@@ -153,7 +147,7 @@ const artworks = {
   "tiger-pen": {
     "title": "トラ",
     "meta": "2025 | ペン・色鉛筆、紙 | 297 x 210 mm",
-    "desc": "横顔を見せるトラの細密なペン画に、色鉛筆の柔らかな橙色が重ねられています。瞳の先できらきらと輝く金色の光の粒が、野性的な力強さの中にファンタジーの香りを漂わせています。",
+    "desc": "横顔を見せるトラ의 細密なペン画に、色鉛筆の柔らかな橙色が重ねられています。瞳の先できらきらと輝く金色の光の粒が、野性的な力強さの中にファンタジーの香りを漂わせています。",
     "image": "assets/images/トラ＿ペン.webp",
     "auraColor": "rgba(232, 140, 74, 0.4)",
     "zone": "forest",
@@ -216,7 +210,7 @@ const artworks = {
   "playground-of-squirrels": {
     "title": "リス達の遊び場所",
     "meta": "2024 | 水彩、紙 | 297 x 210 mm",
-    "desc": "吊り下げられた美しい青い陶器の植木鉢の中で、嬉しそうに遊ぶ二匹のリス。背景に広がる爽やかなミントグリーン and 赤や青の色彩が、木漏れ日あふれる庭先の穏やかな一日を感じさせます。",
+    "desc": "吊り下げられた美しい青い陶器の植木鉢の中で、嬉しそうに遊ぶ二匹のリス。背景に広がる爽やかなミントグリーンと赤や青の色彩が、木漏れ日あふれる庭先の穏やかな一日を感じさせます。",
     "image": "assets/images/リス達の遊び場所.webp",
     "auraColor": "rgba(168, 218, 220, 0.4)",
     "zone": "forest",
@@ -396,7 +390,7 @@ const artworks = {
   "flowers-and-retriever": {
     "title": "花とレトリバー",
     "meta": "2025 | 水彩、紙 | 210 x 297 mm",
-    "desc": "チューリップなどのお花を嬉しそうにくわえ、満面の笑みを浮かべるゴールデンレトリバー。優しい色彩の重なりと、愛犬の心からの喜びが伝わってくるような温かな表情が胸を打ちます。",
+    "desc": "チューリップなどのお花を嬉しそうにくわえ、満面の笑みを浮かべるゴールデンレトリバー。優しい色彩の重なりと、愛犬 of 心からの喜びが伝わってくるような温かな表情が胸を打ちます。",
     "image": "assets/images/花とレトリバー.webp",
     "auraColor": "rgba(255, 230, 180, 0.4)",
     "zone": "forest",
@@ -449,6 +443,15 @@ let mainFilterNode = null;
 let starChimeGain = null;
 let starChimeInterval = null;
 
+// Room transition tracking flags
+let currentZone = 'water';
+let isTransitioning = false;
+const zoneLimits = {
+    'water': 0,
+    'forest': 0,
+    'stars': 0
+};
+
 // Dynamic Gallery Generation
 function generateGallery() {
     const track = document.getElementById('gallery-track');
@@ -457,6 +460,10 @@ function generateGallery() {
     // Select the end marker (Artist profile wall)
     const artistWall = track.querySelector('.artist-wall');
     if (!artistWall) return;
+    
+    // Clean dynamic walls if exist
+    const oldWalls = track.querySelectorAll('.dynamic-wall');
+    oldWalls.forEach(w => w.remove());
     
     // Sort keys based on zone order: water -> forest -> stars
     const sortedKeys = Object.keys(artworks).sort((a, b) => {
@@ -468,15 +475,38 @@ function generateGallery() {
     artworkKeys.length = 0;
     artworkKeys.push(...sortedKeys);
     
-    let index = 1;
+    // Group artworks in pairs to build double-hanging walls
+    const grouped = [];
+    let currentGroup = [];
+    let activeZone = '';
+    
     sortedKeys.forEach(key => {
         const data = artworks[key];
-        const wallNumber = String(index).padStart(2, '0');
-        index++;
-        
-        // Cycle frame borders
-        const frames = ['frame-wooden', 'frame-gold', 'frame-dark'];
-        const frameClass = frames[index % frames.length];
+        if (activeZone !== data.zone) {
+            // Push remaining from previous zone
+            if (currentGroup.length > 0) {
+                grouped.push({ zone: activeZone, items: currentGroup });
+                currentGroup = [];
+            }
+            activeZone = data.zone;
+        }
+        currentGroup.push(key);
+        // Pair structure: max 2 items per wall
+        if (currentGroup.length === 2) {
+            grouped.push({ zone: activeZone, items: currentGroup });
+            currentGroup = [];
+        }
+    });
+    // Push the very last remaining item
+    if (currentGroup.length > 0) {
+        grouped.push({ zone: activeZone, items: currentGroup });
+    }
+    
+    let index = 1;
+    grouped.forEach(group => {
+        const section = document.createElement('section');
+        section.className = 'gallery-section artwork-wall dynamic-wall';
+        section.setAttribute('data-zone', group.zone);
         
         // Define zone color mappings for dynamic backdrop interpolation
         const bgColors = {
@@ -484,31 +514,67 @@ function generateGallery() {
             'forest': { night: '#0f1711', day: '#dfe5e0' },
             'stars': { night: '#120c18', day: '#eae4e9' }
         };
-        const colors = bgColors[data.zone] || bgColors['forest'];
-        
-        const section = document.createElement('section');
-        section.className = 'gallery-section artwork-wall';
-        section.setAttribute('data-artwork', key);
+        const colors = bgColors[group.zone] || bgColors['forest'];
         section.setAttribute('data-bg-night', colors.night);
         section.setAttribute('data-bg-day', colors.day);
         
-        section.innerHTML = `
-            <div class="artwork-container">
-                <span class="wall-number">${wallNumber}</span>
-                <div class="frame ${frameClass} clickable-frame" onclick="openLightbox('${key}')">
-                    <div class="artwork-wrapper">
-                        <img src="${data.image}" alt="${data.title}" class="gallery-image" loading="lazy">
-                        <div class="glass-reflection"></div>
+        let innerHtml = '';
+        
+        // Item 1: Midground (smaller, background)
+        if (group.items[0]) {
+            const keyA = group.items[0];
+            const dataA = artworks[keyA];
+            const wallNumA = String(index++).padStart(2, '0');
+            const offsetA = (index % 2 === 0) ? -40 : 40; // Zig-zag offsets
+            
+            innerHtml += `
+                <div class="parallax-layer mid-layer" style="--y-offset: ${offsetA}px;">
+                    <div class="artwork-container">
+                        <span class="wall-number">${wallNumA}</span>
+                        <div class="frame frame-wooden clickable-frame" onclick="openLightbox('${keyA}')">
+                            <div class="artwork-wrapper">
+                                <img src="${dataA.image}" alt="${dataA.title}" class="gallery-image" loading="lazy">
+                                <div class="glass-reflection"></div>
+                            </div>
+                        </div>
+                        <div class="museum-plaque">
+                            <h4 class="artwork-title">${dataA.title}</h4>
+                            <p class="artwork-meta">${dataA.meta}</p>
+                        </div>
                     </div>
                 </div>
-                <div class="museum-plaque">
-                    <h4 class="artwork-title">${data.title}</h4>
-                    <p class="artwork-meta">${data.meta}</p>
-                    <span class="view-hint">Click to examine</span>
-                </div>
-            </div>
-        `;
+            `;
+        }
         
+        // Item 2: Foreground (larger, foreground)
+        if (group.items[1]) {
+            const keyB = group.items[1];
+            const dataB = artworks[keyB];
+            const wallNumB = String(index++).padStart(2, '0');
+            const offsetB = (index % 2 === 0) ? 60 : -60; // Opposite offsets
+            const frameStyles = ['frame-gold', 'frame-dark'];
+            const frameClass = frameStyles[index % frameStyles.length];
+            
+            innerHtml += `
+                <div class="parallax-layer fore-layer" style="--y-offset: ${offsetB}px;">
+                    <div class="artwork-container">
+                        <span class="wall-number">${wallNumB}</span>
+                        <div class="frame ${frameClass} clickable-frame" onclick="openLightbox('${keyB}')">
+                            <div class="artwork-wrapper">
+                                <img src="${dataB.image}" alt="${dataB.title}" class="gallery-image" loading="lazy">
+                                <div class="glass-reflection"></div>
+                            </div>
+                        </div>
+                        <div class="museum-plaque">
+                            <h4 class="artwork-title">${dataB.title}</h4>
+                            <p class="artwork-meta">${dataB.meta}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        section.innerHTML = innerHtml;
         track.insertBefore(section, artistWall);
     });
     
@@ -539,16 +605,38 @@ btnEnter.addEventListener('click', () => {
         
         // Initial backdrop colors and sound state alignment
         updateBackdropAndSound();
+        calculateZoneBoundaries();
     }, 1200);
 });
 
+// Calculate pixel scroll boundaries for room transitions
+function calculateZoneBoundaries() {
+    const walls = Array.from(document.querySelectorAll('.artwork-wall'));
+    if (walls.length === 0) return;
+    
+    let lastWaterIdx = -1;
+    let lastForestIdx = -1;
+    
+    walls.forEach((wall, idx) => {
+        const zone = wall.getAttribute('data-zone');
+        if (zone === 'water') lastWaterIdx = idx;
+        if (zone === 'forest') lastForestIdx = idx;
+    });
+    
+    const containerWidth = galleryContainer.clientWidth;
+    
+    if (lastWaterIdx !== -1 && walls[lastWaterIdx]) {
+        zoneLimits['water'] = walls[lastWaterIdx].offsetLeft + walls[lastWaterIdx].offsetWidth - containerWidth / 2;
+    }
+    if (lastForestIdx !== -1 && walls[lastForestIdx]) {
+        zoneLimits['forest'] = walls[lastForestIdx].offsetLeft + walls[lastForestIdx].offsetWidth - containerWidth / 2;
+    }
+}
+
 // 2. Horizontal Scrolling (converts vertical wheel scrolling to horizontal scroll)
 galleryContainer.addEventListener('wheel', (e) => {
-    // Only intercept if we are in desktop horizontal mode
-    if (window.innerWidth > 768) {
+    if (window.innerWidth > 768 && !isTransitioning) {
         e.preventDefault();
-        
-        // Smooth scroll interpolation
         galleryContainer.scrollBy({
             left: e.deltaY * 1.5,
             behavior: 'auto'
@@ -556,13 +644,38 @@ galleryContainer.addEventListener('wheel', (e) => {
     }
 }, { passive: false });
 
-// 3. Spotlight Cursor Tracker
+// 3. Spotlight Cursor Tracker & Gyroscope setup
 document.addEventListener('mousemove', (e) => {
     const x = (e.clientX / window.innerWidth) * 100;
     const y = (e.clientY / window.innerHeight) * 100;
     
     document.documentElement.style.setProperty('--mouse-x', `${x}%`);
     document.documentElement.style.setProperty('--mouse-y', `${y}%`);
+});
+
+// Handle mobile device tilt (Gyroscope)
+let lastBeta = 0;
+let lastGamma = 0;
+window.addEventListener('deviceorientation', (e) => {
+    const beta = e.beta; 
+    const gamma = e.gamma;
+    
+    if (beta === null || gamma === null) return;
+    
+    // Smooth using simple LERP filter
+    const smoothBeta = lastBeta + (beta - lastBeta) * 0.15;
+    const smoothGamma = lastGamma + (gamma - lastGamma) * 0.15;
+    
+    lastBeta = smoothBeta;
+    lastGamma = smoothGamma;
+    
+    // Map to offset pixels (-30px to 30px)
+    const gyroX = Math.max(-30, Math.min(30, smoothGamma * 0.7));
+    // Assume user holds phone tilted at 50 degrees naturally
+    const gyroY = Math.max(-30, Math.min(30, (smoothBeta - 50) * 0.7));
+    
+    document.documentElement.style.setProperty('--gyro-x', `${gyroX}px`);
+    document.documentElement.style.setProperty('--gyro-y', `${gyroY}px`);
 });
 
 // 4. Day / Night Theme Toggler
@@ -688,15 +801,13 @@ function triggerBleedEffect() {
         cancelAnimationFrame(bleedAnimId);
     }
     
-    const duration = 1500; // 1.5 seconds animation for a more graceful resolution
-    const startScale = 250; // Much stronger initial displacement for a dramatic "splash"
+    const duration = 1500;
+    const startScale = 250;
     const startTime = performance.now();
     
     function animate(currentTime) {
         const elapsed = currentTime - startTime;
         const progress = Math.min(elapsed / duration, 1);
-        
-        // easeOutQuart transition for sudden explosion of bleed, then gradual focus
         const easeOutQuart = 1 - Math.pow(1 - progress, 4);
         const currentScale = startScale * (1 - easeOutQuart);
         
@@ -751,11 +862,9 @@ function openLightbox(key) {
     }
     
     lightbox.classList.remove('hide');
-    // Force reflow
     lightbox.offsetWidth;
     lightbox.classList.add('show');
     
-    // Trigger the watercolor transition
     triggerBleedEffect();
 }
 
@@ -784,7 +893,6 @@ function navigateArtwork(direction) {
     
     const newKey = artworkKeys[currentIndex];
     
-    // Smooth transition between slides
     lightboxImg.style.opacity = '0';
     lightboxTitle.style.opacity = '0';
     lightboxMeta.style.opacity = '0';
@@ -842,9 +950,8 @@ function startStarChimeLoop() {
     starChimeInterval = setInterval(() => {
         if (!audioCtx || audioCtx.state === 'suspended' || !isPlaying) return;
         
-        // Randomly play high chimes representing twinkling stars
         if (Math.random() > 0.45) {
-            const scale = [783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98]; // High pentatonic scale
+            const scale = [783.99, 880.00, 1046.50, 1174.66, 1318.51, 1567.98];
             const randomFreq = scale[Math.floor(Math.random() * scale.length)];
             
             const osc = audioCtx.createOscillator();
@@ -873,8 +980,6 @@ function updateAmbientSynth(scrollLeft, maxScroll) {
     
     const ratio = maxScroll > 0 ? scrollLeft / maxScroll : 0;
     
-    // 1. Morph lowpass filter cutoff frequency
-    // Deep underwater/water-themed zone (180Hz) -> mid-range warm forest zone (330Hz) -> bright starry sky (480Hz)
     const minFreq = 170;
     const maxFreq = 480;
     const targetFreq = minFreq + (maxFreq - minFreq) * ratio;
@@ -883,14 +988,98 @@ function updateAmbientSynth(scrollLeft, maxScroll) {
         mainFilterNode.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.4);
     }
     
-    // 2. Adjust starry night high chimes volume
-    // High chimes gradually fade in during the second half of the gallery (Zone 3, ratio > 0.5)
     if (starChimeGain) {
         let chimeVol = 0;
         if (ratio > 0.5) {
-            chimeVol = (ratio - 0.5) * 2; // scale 0.0 -> 1.0
+            chimeVol = (ratio - 0.5) * 2;
         }
         starChimeGain.gain.setTargetAtTime(chimeVol * 0.5, audioCtx.currentTime, 0.4);
+    }
+}
+
+// Perform 3D parallax on scroll
+function updateParallax() {
+    const walls = document.querySelectorAll('.dynamic-wall');
+    const containerWidth = galleryContainer.clientWidth;
+    const scrollLeft = galleryContainer.scrollLeft;
+    
+    walls.forEach(wall => {
+        const wallStart = wall.offsetLeft;
+        const wallWidth = wall.offsetWidth;
+        const wallCenter = wallStart + wallWidth / 2;
+        const scrollCenter = scrollLeft + containerWidth / 2;
+        
+        // Relative distance from viewport center (-1.0 to 1.0)
+        const distance = (scrollCenter - wallCenter) / (containerWidth / 2);
+        
+        if (Math.abs(distance) < 2) {
+            const midLayer = wall.querySelector('.mid-layer');
+            const foreLayer = wall.querySelector('.fore-layer');
+            
+            if (midLayer) {
+                // Move midground slower (opposite to scroll direction)
+                const midX = distance * -30; 
+                midLayer.style.setProperty('--mid-x', `${midX}px`);
+            }
+            if (foreLayer) {
+                // Move foreground faster (in scroll direction)
+                const foreX = distance * 40;
+                foreLayer.style.setProperty('--fore-x', `${foreX}px`);
+            }
+        }
+    });
+}
+
+// Handle room changes via ink overlay transitions
+function checkRoomTransitions(scrollLeft) {
+    if (isTransitioning) return;
+    
+    const overlay = document.getElementById('room-transition-overlay');
+    if (!overlay) return;
+    
+    let targetZone = '';
+    let targetScroll = 0;
+    let transitionColor = 'rgba(144, 210, 220, 0.95)'; // water -> forest (greenish blue)
+    
+    if (currentZone === 'water' && scrollLeft > zoneLimits['water'] && zoneLimits['water'] > 0) {
+        targetZone = 'forest';
+        targetScroll = zoneLimits['water'] + 250;
+        transitionColor = 'rgba(144, 210, 220, 0.95)';
+    } else if (currentZone === 'forest' && scrollLeft > zoneLimits['forest'] && zoneLimits['forest'] > 0) {
+        targetZone = 'stars';
+        targetScroll = zoneLimits['forest'] + 250;
+        transitionColor = 'rgba(220, 180, 240, 0.95)'; // forest -> stars (purple/magenta)
+    } else if (currentZone === 'forest' && scrollLeft < zoneLimits['water'] && zoneLimits['water'] > 0) {
+        targetZone = 'water';
+        targetScroll = zoneLimits['water'] - 200;
+        transitionColor = 'rgba(144, 210, 220, 0.95)';
+    } else if (currentZone === 'stars' && scrollLeft < zoneLimits['forest'] && zoneLimits['forest'] > 0) {
+        targetZone = 'forest';
+        targetScroll = zoneLimits['forest'] - 200;
+        transitionColor = 'rgba(220, 180, 240, 0.95)';
+    }
+    
+    if (targetZone) {
+        isTransitioning = true;
+        currentZone = targetZone;
+        
+        // Trigger overlay ink stain bleed animation
+        overlay.style.setProperty('--transition-color', transitionColor);
+        overlay.classList.add('show-transition');
+        
+        setTimeout(() => {
+            // Jump container scroll inside the ink stain
+            galleryContainer.scrollTo({
+                left: targetScroll,
+                behavior: 'auto'
+            });
+            updateBackdropAndSound();
+        }, 800);
+        
+        setTimeout(() => {
+            overlay.classList.remove('show-transition');
+            isTransitioning = false;
+        }, 1800);
     }
 }
 
@@ -905,7 +1094,6 @@ function updateBackdropAndSound() {
     const isNight = document.body.classList.contains('theme-night');
     const colorAttr = isNight ? 'data-bg-night' : 'data-bg-day';
     
-    // Identify which sections the scroll center lies between
     let activeIndex = 0;
     for (let i = 0; i < sections.length; i++) {
         const sec = sections[i];
@@ -950,7 +1138,6 @@ function updateBackdropAndSound() {
     
     blendRatio = Math.max(0, Math.min(1, blendRatio));
     
-    // Interpolate colors
     const hexStart = sections[activeIndex].getAttribute(colorAttr) || '#0f1113';
     const hexEnd = sections[nextIndex].getAttribute(colorAttr) || '#0f1113';
     
@@ -967,14 +1154,18 @@ function updateBackdropAndSound() {
         document.documentElement.style.setProperty('--wall-color', blendedColor);
     }
     
-    // Sync ambient sound to scroll progress
     const maxScroll = galleryContainer.scrollWidth - containerWidth;
     updateAmbientSynth(scrollLeft, maxScroll);
+    updateParallax();
+    checkRoomTransitions(scrollLeft);
 }
 
 // Bind scrolling and resizing events to trigger updates
 galleryContainer.addEventListener('scroll', updateBackdropAndSound);
-window.addEventListener('resize', updateBackdropAndSound);
+window.addEventListener('resize', () => {
+    updateBackdropAndSound();
+    calculateZoneBoundaries();
+});
 
 // Loader Control Simulation
 function initLoader() {

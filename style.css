@@ -1220,3 +1220,133 @@ body {
     transform: translateY(-1px);
 }
 
+/* ==========================================
+   4. 3D PARALLAX GALLERY & GYROSCOPIC STYLES
+   ========================================== */
+
+/* Artwork Wall redesign for Parallax */
+.artwork-wall {
+    width: 60vw;
+    min-width: 500px;
+    height: 100%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    perspective: 1000px;
+    padding: 0 4rem;
+}
+
+/* Base style for Parallax Layers */
+.parallax-layer {
+    position: absolute;
+    will-change: transform;
+    transition: transform 0.1s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* Midground Layer (Deep background / smaller) */
+.mid-layer {
+    z-index: 5;
+    transform: translate3d(var(--mid-x, 0px), var(--y-offset, -30px), -100px) scale(0.85);
+    opacity: 0.65;
+    filter: blur(0.5px);
+    transition: opacity 0.5s ease, filter 0.5s ease;
+}
+
+.mid-layer:hover {
+    opacity: 0.95;
+    filter: blur(0);
+}
+
+/* Foreground Layer (Near viewer / larger) */
+.fore-layer {
+    z-index: 10;
+    transform: translate3d(var(--fore-x, 0px), var(--y-offset, 40px), 50px) scale(1.05);
+    opacity: 1;
+}
+
+/* Mobile responsive override */
+@media (max-width: 768px) {
+    .artwork-wall {
+        width: 85vw;
+        min-width: 320px;
+        padding: 0 1.5rem;
+    }
+    
+    .mid-layer {
+        transform: translate3d(var(--mid-x, 0px), var(--y-offset, -45px), -80px) scale(0.78);
+    }
+    
+    .fore-layer {
+        transform: translate3d(var(--fore-x, 0px), var(--y-offset, 55px), 30px) scale(1.02);
+    }
+}
+
+/* Gyroscope dynamic glass reflection */
+.clickable-frame:hover .glass-reflection {
+    background: radial-gradient(circle 350px at calc(var(--mouse-x, 50%) + var(--gyro-x, 0px)) calc(var(--mouse-y, 50%) + var(--gyro-y, 0px)), rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.02) 65%, transparent 100%);
+    opacity: 0.95;
+}
+
+/* Mobile device gyro shine */
+@media (hover: none) {
+    .glass-reflection {
+        background: radial-gradient(circle 250px at calc(50% + var(--gyro-x, 0px)) calc(50% + var(--gyro-y, 0px)), rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.02) 70%, transparent 100%);
+        opacity: 0.75;
+    }
+}
+
+/* Room Transition Overlay */
+.room-transition-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 9999;
+    background-color: transparent;
+    pointer-events: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+}
+
+.ink-stain-transition {
+    width: 0vmax;
+    height: 0vmax;
+    border-radius: 50%;
+    background: radial-gradient(circle, var(--transition-color, rgba(144, 210, 220, 0.95)) 0%, var(--transition-color, rgba(220, 180, 240, 0.95)) 50%, transparent 100%);
+    filter: url(#water-bleed-filter) blur(20px);
+    opacity: 0;
+    transition: width 1.8s cubic-bezier(0.16, 1, 0.3, 1), height 1.8s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.2s ease;
+}
+
+.room-transition-overlay.show-transition {
+    pointer-events: auto;
+}
+
+.room-transition-overlay.show-transition .ink-stain-transition {
+    width: 250vmax;
+    height: 250vmax;
+    opacity: 1;
+}
+
+/* Adjust vertical grid in Museum Shop for better mobile display */
+@media (max-width: 768px) {
+    .shop-wall {
+        width: 90vw;
+        min-width: 290px;
+    }
+    
+    .shop-inner {
+        padding-left: 1.5rem;
+    }
+    
+    .shop-grid {
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+}
+
+
