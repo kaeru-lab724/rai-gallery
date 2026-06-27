@@ -1008,6 +1008,11 @@ function initLoader() {
     }, 150);
 }
 
+// Expose functions globally for inline HTML click handlers (due to ES module scope)
+window.openLightbox = openLightbox;
+window.closeLightbox = closeLightbox;
+window.navigateArtwork = navigateArtwork;
+
 // Safely generate gallery and launch loader when DOM is fully prepared
 window.addEventListener('DOMContentLoaded', () => {
     generateGallery();
