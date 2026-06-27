@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <radialGradient id="color1" cx="20%" cy="20%" r="50%">
+      <stop offset="0%" stop-color="#90d2dc" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#90d2dc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="color2" cx="70%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#dcb4f0" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#dcb4f0" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="color3" cx="40%" cy="70%" r="50%">
+      <stop offset="0%" stop-color="#ffd1dc" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffd1dc" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="color4" cx="80%" cy="80%" r="50%">
+      <stop offset="0%" stop-color="#ffdf00" stop-opacity="0.7"/>
+      <stop offset="100%" stop-color="#ffdf00" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <!-- Paint stain shape -->
+  <path d="M16 2C24 2 30 7 30 14C30 19 26 22 22 22C20 22 19 23 18 25C17 27 18 29 15 30C8 31 2 25 2 17C2 9 8 2 16 2Z" fill="#ffffff" stroke="#e2e8f0" stroke-width="1.5"/>
+  <!-- Blurring watercolor colors -->
+  <circle cx="12" cy="12" r="10" fill="url(#color1)"/>
+  <circle cx="22" cy="14" r="9" fill="url(#color2)"/>
+  <circle cx="15" cy="22" r="8" fill="url(#color3)"/>
+  <circle cx="24" cy="22" r="6" fill="url(#color4)"/>
+  <!-- Palette Thumb Hole -->
+  <circle cx="8" cy="24" r="2.5" fill="#f6f4ee" stroke="#cbd5e1" stroke-width="0.75"/>
+</svg>
