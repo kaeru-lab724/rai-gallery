@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>rai 個展「静かなささやき」 | rai Solo Exhibition - Muted Whispers</title>
+    <meta name="description" content="水彩イラストレーター・raiのバーチャル絵画展。静かな森や動物たちの息づかいを、オンライン美術館のようにお楽しみください。">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Noto+Serif+JP:wght@300;400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Favicon -->
+    <link rel="icon" type="image/svg+xml" href="assets/icons/favicon.svg">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-night">
+
+    <!-- 0. SCREEN LOADER -->
+    <div id="loader" class="screen-loader">
+        <div class="loader-bg-paper"></div>
+        <div class="loader-content">
+            <div class="loader-watercolor-stain"></div>
+            <div class="loader-text-wrapper">
+                <span class="loader-sub">rai Solo Exhibition</span>
+                <h2 class="loader-title">Muted Whispers</h2>
+                <div class="loader-bar-container">
+                    <div class="loader-bar" id="loader-bar"></div>
+                </div>
+                <span class="loader-status">空間をにじませています...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Ambient Texture Layer -->
+    <div class="noise-overlay"></div>
+    <div class="spotlight-cursor" id="spotlight"></div>
+
+    <!-- 1. ENTRANCE SCREEN -->
+    <section id="entrance" class="entrance-screen">
+        <div class="entrance-content">
+            <div class="exhibition-meta">rai Solo Exhibition</div>
+            <h1 class="exhibition-title">Muted Whispers</h1>
+            <div class="exhibition-subtitle">静かなささやき</div>
+            
+            <div class="entrance-poster">
+                <div class="frame frame-wooden">
+                    <div class="artwork-wrapper">
+                        <img src="assets/images/starry_cat.jpg" alt="星夜の贈りもの" class="poster-image">
+                    </div>
+                </div>
+            </div>
+            
+            <button id="btn-enter" class="btn-enter">
+                <span class="btn-text">展覧会に入場する</span>
+                <span class="btn-subtext">ENTER GALLERY</span>
+            </button>
+        </div>
+        <div class="entrance-bg-texture"></div>
+    </section>
+
+    <!-- FLOATING UI CONTROLS -->
+    <div id="ui-controls" class="ui-controls hide">
+        <button id="btn-theme" class="control-btn" title="テーマ切り替え">
+            <i class="fa-solid fa-moon"></i>
+            <span class="btn-label">Night Mode</span>
+        </button>
+        <button id="btn-audio" class="control-btn" title="環境音再生">
+            <i class="fa-solid fa-volume-xmark"></i>
+            <span class="btn-label">Sound Off</span>
+        </button>
+    </div>
+
+    <!-- 2. MAIN GALLERY (Horizontal Scroll) -->
+    <main id="gallery-container" class="gallery-container hide">
+        <div class="gallery-track" id="gallery-track">
+            
+            <!-- Intro Section -->
+            <section class="gallery-section intro-wall" data-bg-night="#0a0d14" data-bg-day="#e1e3e6">
+                <div class="intro-inner">
+                    <span class="wall-number">00</span>
+                    <h2 class="section-title">Introduction</h2>
+                    <h3 class="section-subtitle">ごあいさつ</h3>
+                    <div class="intro-text">
+                        <p>
+                            木々のささやき、冷たい水の中に溶ける光、夜空に浮かぶ無数の星。
+                            日常の喧騒から少しだけ離れて、彼ら（動物たち）の静かな瞳を見つめてみてください。
+                        </p>
+                        <p>
+                            本展「Muted Whispers」では、水彩絵の具が織りなす優しい滲みと、
+                            透明感のある光で描かれた動物たちの物語を集めました。
+                            まるで本物の画廊の中をゆっくり歩くように、
+                            心地よい静寂の中で一枚ずつの絵と対話していただければ幸いです。
+                        </p>
+                        <p class="signature">rai</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Dynamic artwork sections will be inserted here by JavaScript -->
+
+            <!-- Artist Section -->
+            <section class="gallery-section artist-wall" data-bg-night="#100b14" data-bg-day="#e8e2e7">
+                <div class="artist-inner">
+                    <span class="wall-number">05</span>
+                    <h2 class="section-title">Artist Profile</h2>
+                    <h3 class="section-subtitle">作家紹介</h3>
+                    
+                    <div class="profile-container">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <i class="fa-solid fa-palette"></i>
+                            </div>
+                            <div class="profile-name-block">
+                                <h4 class="profile-name">rai</h4>
+                                <p class="profile-role">水彩画家 / イラストレーター</p>
+                            </div>
+                        </div>
+                        
+                        <div class="profile-bio">
+                            <p>
+                                透明水彩が表現する、水と絵の具の「にじみ・ゆらぎ」に魅せられ、
+                                主に北欧の深い森や星空、そこに暮らす野生動物たちをモチーフに創作活動を行う。
+                            </p>
+                            <p>
+                                紙の上に広がる水たまりの中に光を見出し、
+                                静かでどこか温かい、息づかいを感じる表現を目指しています。
+                            </p>
+                        </div>
+                        
+                        <div class="profile-sns">
+                            <a href="#" target="_blank" class="sns-link"><i class="fa-brands fa-instagram"></i> Instagram</a>
+                            <a href="#" target="_blank" class="sns-link"><i class="fa-brands fa-x-twitter"></i> X (Twitter)</a>
+                            <a href="#" target="_blank" class="sns-link"><i class="fa-solid fa-globe"></i> Website</a>
+                        </div>
+                        
+                        <div class="profile-contact">
+                            <h5 class="contact-title">Contact</h5>
+                            <p class="contact-desc">お仕事のご依頼、作品に関するお問い合わせは下記フォームより承ります。</p>
+                            <form id="contact-form" class="contact-form" onsubmit="event.preventDefault(); alert('メッセージが送信されました（デモ）');">
+                                <input type="text" placeholder="お名前" required class="form-input">
+                                <input type="email" placeholder="メールアドレス" required class="form-input">
+                                <textarea placeholder="メッセージ本文" required class="form-textarea"></textarea>
+                                <button type="submit" class="btn-submit">送信する</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Museum Shop Section -->
+            <section class="gallery-section shop-wall" data-bg-night="#0e0a12" data-bg-day="#e7e0e5">
+                <div class="shop-inner">
+                    <span class="wall-number">06</span>
+                    <h2 class="section-title">Museum Shop</h2>
+                    <h3 class="section-subtitle">アトリエ・ショップ</h3>
+                    <p class="shop-desc">個展の感動を日常に。rai様のイラストを使用したオリジナルグッズをSUZURIにて販売しております。</p>
+                    <div class="shop-grid">
+                        <div class="shop-item">
+                            <div class="frame frame-wooden">
+                                <div class="artwork-wrapper">
+                                    <img src="assets/images/おやすみねこちゃん.webp" alt="T-Shirt Demo" class="shop-item-image">
+                                    <div class="shop-item-badge">T-Shirt</div>
+                                </div>
+                            </div>
+                            <h5 class="shop-item-title">おやすみねこちゃん Tシャツ</h5>
+                            <a href="https://suzuri.jp" target="_blank" class="btn-shop-link">グッズを見る</a>
+                        </div>
+                        <div class="shop-item">
+                            <div class="frame frame-gold">
+                                <div class="artwork-wrapper">
+                                    <img src="assets/images/春から夏へ泳ぐ鯨.webp" alt="Phone Case Demo" class="shop-item-image">
+                                    <div class="shop-item-badge">Smartphone Case</div>
+                                </div>
+                            </div>
+                            <h5 class="shop-item-title">春から夏へ泳ぐ鯨 スマホケース</h5>
+                            <a href="https://suzuri.jp" target="_blank" class="btn-shop-link">グッズを見る</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- 3. LIGHTBOX MODAL (Details View) -->
+    <div id="lightbox" class="lightbox hide">
+        <div class="lightbox-aura" id="lightbox-aura"></div>
+        <button class="lightbox-close" onclick="closeLightbox()">&times;</button>
+        <div class="lightbox-content">
+            <div class="lightbox-image-area">
+                <div class="lightbox-frame">
+                    <img id="lightbox-img" src="" alt="拡大画像">
+                </div>
+            </div>
+            <div class="lightbox-details">
+                <h3 id="lightbox-title" class="lightbox-title">作品タイトル</h3>
+                <p id="lightbox-meta" class="lightbox-meta">制作年 | 技法・素材</p>
+                <hr class="lightbox-divider">
+                <div id="lightbox-desc" class="lightbox-desc">
+                    作品解説テキストが入ります。
+                </div>
+                <div class="lightbox-actions">
+                    <a id="link-goods" href="#" target="_blank" class="action-btn btn-goods">
+                        <i class="fa-solid fa-bag-shopping"></i> この作品を日常に迎える
+                    </a>
+                    <button id="btn-share" class="action-btn btn-share">
+                        <i class="fa-brands fa-x-twitter"></i> 空間を共有する
+                    </button>
+                </div>
+                <div class="lightbox-navigation">
+                    <button id="btn-prev" class="nav-btn"><i class="fa-solid fa-arrow-left"></i> 前の作品</button>
+                    <button id="btn-next" class="nav-btn">次の作品 <i class="fa-solid fa-arrow-right"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SVG Filter for Watercolor Bleed Effect -->
+    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
+        <filter id="water-bleed-filter">
+            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
+            <feDisplacementMap id="bleed-displacement" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
+        </filter>
+    </svg>
+
+    <!-- Custom Script -->
+    <script src="app.js"></script>
+</body>
+</html>
