@@ -474,8 +474,8 @@ function generateGallery(zoneFilter) {
         const data = artworks[key];
         const wallNumber = String(index).padStart(2, '0');
         
-        // Soft vertical zig-zag offset to create high-low rhythm (Never overlaps!)
-        const yOffset = (index % 2 === 0) ? 35 : -35;
+        // 縦スクロール用に左右のジグザグ配置クラスを付与
+        const alignClass = (index % 2 === 0) ? 'align-left' : 'align-right';
         index++;
         
         // Cycle frame borders
@@ -491,11 +491,10 @@ function generateGallery(zoneFilter) {
         const colors = bgColors[zoneFilter] || bgColors['forest'];
         
         const section = document.createElement('section');
-        section.className = 'gallery-section artwork-wall dynamic-wall';
+        section.className = `gallery-section artwork-wall dynamic-wall ${alignClass}`;
         section.setAttribute('data-artwork', key);
         section.setAttribute('data-bg-night', colors.night);
         section.setAttribute('data-bg-day', colors.day);
-        section.style.setProperty('--y-offset', `${yOffset}px`);
         
         section.innerHTML = `
             <div class="artwork-container">
@@ -531,7 +530,7 @@ function generateGallery(zoneFilter) {
     }
 }
 
-// Room transition logic (Triggers ink stain and swaps database)
+// Room transition logic (Triggers smooth overlay and swaps database)
 function switchRoom(newZone) {
     if (isTransitioning || selectedRoomZone === newZone) return;
     isTransitioning = true;
@@ -539,25 +538,24 @@ function switchRoom(newZone) {
     const overlay = document.getElementById('room-transition-overlay');
     if (!overlay) return;
     
-    // Map overlay theme color
     const transitionColors = {
-        'water': 'rgba(26, 54, 110, 0.95)',
-        'forest': 'rgba(40, 75, 55, 0.95)',
-        'stars': 'rgba(50, 30, 70, 0.95)'
+        'water': 'rgba(9, 13, 22, 0.96)',
+        'forest': 'rgba(15, 23, 17, 0.96)',
+        'stars': 'rgba(18, 12, 24, 0.96)'
     };
-    const stainColor = transitionColors[newZone] || 'rgba(0, 0, 0, 0.95)';
+    const stainColor = transitionColors[newZone] || 'rgba(15, 17, 19, 0.96)';
     overlay.style.setProperty('--transition-color', stainColor);
     
-    // 1. Splash ink stain
+    // 1. Fade in transition overlay
     overlay.classList.add('show-transition');
     
     setTimeout(() => {
-        // 2. Perform DOM swap inside the ink block
+        // 2. Perform DOM swap
         selectedRoomZone = newZone;
         generateGallery(newZone);
         
-        // Reset scroll position to the front of the new room
-        galleryContainer.scrollLeft = 0;
+        // Reset scroll position to top (Vertical Scroll)
+        galleryContainer.scrollTop = 0;
         
         // Synchronize Active states on Navigation Tabs
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -571,13 +569,13 @@ function switchRoom(newZone) {
         // Synchronize ambient synthesizer parameters to match new room
         updateAmbientSynthForRoom(newZone);
         updateBackdropAndSound();
-    }, 850);
+    }, 600);
     
     setTimeout(() => {
-        // 3. Clear ink stain
+        // 3. Clear transition overlay
         overlay.classList.remove('show-transition');
         isTransitioning = false;
-    }, 1800);
+    }, 1200);
 }
 
 // Update Audio settings instantly for the current exhibition room
@@ -596,7 +594,6 @@ function updateAmbientSynthForRoom(zone) {
     }
     
     if (starChimeGain) {
-        // Chimes active in forest (soft) and stars (bright), silent in water
         const gains = {
             'water': 0.0,
             'forest': 0.15,
@@ -643,7 +640,7 @@ function startEntranceFlow(zone) {
         // Build selected room gallery dynamically
         generateGallery(selectedRoomZone);
         updateBackdropAndSound();
-    }, 1200);
+    }, 1000);
 }
 
 // Room navigation tabs click handlers
@@ -654,50 +651,7 @@ document.querySelectorAll('.tab-btn').forEach(tab => {
     });
 });
 
-// 2. Horizontal Scrolling (converts vertical wheel scrolling to horizontal scroll)
-galleryContainer.addEventListener('wheel', (e) => {
-    if (window.innerWidth > 768 && !isTransitioning) {
-        e.preventDefault();
-        galleryContainer.scrollBy({
-            left: e.deltaY * 1.5,
-            behavior: 'auto'
-        });
-    }
-}, { passive: false });
-
-// 3. Spotlight Cursor Tracker & Gyroscope setup
-document.addEventListener('mousemove', (e) => {
-    const x = (e.clientX / window.innerWidth) * 100;
-    const y = (e.clientY / window.innerHeight) * 100;
-    
-    document.documentElement.style.setProperty('--mouse-x', `${x}%`);
-    document.documentElement.style.setProperty('--mouse-y', `${y}%`);
-});
-
-// Handle mobile device tilt (Gyroscope)
-let lastBeta = 0;
-let lastGamma = 0;
-window.addEventListener('deviceorientation', (e) => {
-    const beta = e.beta; 
-    const gamma = e.gamma;
-    
-    if (beta === null || gamma === null) return;
-    
-    const smoothBeta = lastBeta + (beta - lastBeta) * 0.15;
-    const smoothGamma = lastGamma + (gamma - lastGamma) * 0.15;
-    
-    lastBeta = smoothBeta;
-    lastGamma = smoothGamma;
-    
-    // Map to offset pixels (-25px to 25px)
-    const gyroX = Math.max(-25, Math.min(25, smoothGamma * 0.6));
-    const gyroY = Math.max(-25, Math.min(25, (smoothBeta - 50) * 0.6));
-    
-    document.documentElement.style.setProperty('--gyro-x', `${gyroX}px`);
-    document.documentElement.style.setProperty('--gyro-y', `${gyroY}px`);
-});
-
-// 4. Day / Night Theme Toggler
+// 2. Day / Night Theme Toggler
 btnTheme.addEventListener('click', () => {
     const body = document.body;
     if (body.classList.contains('theme-night')) {
@@ -713,7 +667,7 @@ btnTheme.addEventListener('click', () => {
     updateBackdropAndSound();
 });
 
-// 5. Ambient sound generator (Web Audio API)
+// 3. Ambient sound generator (Web Audio API)
 function initAmbientSynth() {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     
@@ -795,37 +749,7 @@ btnAudio.addEventListener('click', () => {
     }
 });
 
-// 6. Watercolor Bleed Effect Animation
-function triggerBleedEffect() {
-    if (bleedAnimId) {
-        cancelAnimationFrame(bleedAnimId);
-    }
-    
-    const duration = 1500;
-    const startScale = 250;
-    const startTime = performance.now();
-    
-    function animate(currentTime) {
-        const elapsed = currentTime - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        const easeOutQuart = 1 - Math.pow(1 - progress, 4);
-        const currentScale = startScale * (1 - easeOutQuart);
-        
-        if (bleedDisplacement) {
-            bleedDisplacement.setAttribute('scale', currentScale);
-        }
-        
-        if (progress < 1) {
-            bleedAnimId = requestAnimationFrame(animate);
-        } else {
-            bleedAnimId = null;
-        }
-    }
-    
-    bleedAnimId = requestAnimationFrame(animate);
-}
-
-// 7. Lightbox logic
+// 4. Lightbox logic
 function openLightbox(key) {
     currentArtworkKey = key;
     const data = artworks[key];
@@ -864,21 +788,12 @@ function openLightbox(key) {
     lightbox.classList.remove('hide');
     lightbox.offsetWidth;
     lightbox.classList.add('show');
-    
-    triggerBleedEffect();
 }
 
 function closeLightbox() {
     lightbox.classList.remove('show');
-    if (bleedAnimId) {
-        cancelAnimationFrame(bleedAnimId);
-        bleedAnimId = null;
-    }
     setTimeout(() => {
         lightbox.classList.add('hide');
-        if (bleedDisplacement) {
-            bleedDisplacement.setAttribute('scale', 0);
-        }
     }, 500);
 }
 
@@ -930,7 +845,7 @@ lightbox.addEventListener('click', (e) => {
     }
 });
 
-// 8. Dynamic zoning: backdrop colors & synth morphing logic
+// 5. Dynamic zoning: backdrop colors & synth morphing logic
 function hexToRgb(hex) {
     const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
     return result ? {
@@ -976,13 +891,14 @@ function startStarChimeLoop() {
     }, 1500);
 }
 
+// Background morphing based on vertical scroll position
 function updateBackdropAndSound() {
     const sections = Array.from(document.querySelectorAll('.gallery-section'));
     if (sections.length === 0) return;
     
-    const containerWidth = galleryContainer.clientWidth;
-    const scrollLeft = galleryContainer.scrollLeft;
-    const scrollCenter = scrollLeft + containerWidth / 2;
+    const containerHeight = galleryContainer.clientHeight;
+    const scrollTop = galleryContainer.scrollTop;
+    const scrollCenter = scrollTop + containerHeight / 2;
     
     const isNight = document.body.classList.contains('theme-night');
     const colorAttr = isNight ? 'data-bg-night' : 'data-bg-day';
@@ -990,8 +906,8 @@ function updateBackdropAndSound() {
     let activeIndex = 0;
     for (let i = 0; i < sections.length; i++) {
         const sec = sections[i];
-        const secStart = sec.offsetLeft;
-        const secEnd = secStart + sec.offsetWidth;
+        const secStart = sec.offsetTop;
+        const secEnd = secStart + sec.offsetHeight;
         
         if (scrollCenter >= secStart && scrollCenter <= secEnd) {
             activeIndex = i;
@@ -1010,17 +926,17 @@ function updateBackdropAndSound() {
     let blendRatio = 0;
     
     const currentSec = sections[activeIndex];
-    const currentCenter = currentSec.offsetLeft + currentSec.offsetWidth / 2;
+    const currentCenter = currentSec.offsetTop + currentSec.offsetHeight / 2;
     
     if (scrollCenter > currentCenter && activeIndex < sections.length - 1) {
         nextIndex = activeIndex + 1;
         const nextSec = sections[nextIndex];
-        const nextCenter = nextSec.offsetLeft + nextSec.offsetWidth / 2;
+        const nextCenter = nextSec.offsetTop + nextSec.offsetHeight / 2;
         blendRatio = (scrollCenter - currentCenter) / (nextCenter - currentCenter);
     } else if (scrollCenter < currentCenter && activeIndex > 0) {
         nextIndex = activeIndex - 1;
         const prevSec = sections[nextIndex];
-        const prevCenter = prevSec.offsetLeft + prevSec.offsetWidth / 2;
+        const prevCenter = prevSec.offsetTop + prevSec.offsetHeight / 2;
         blendRatio = (currentCenter - scrollCenter) / (currentCenter - prevCenter);
         
         const temp = activeIndex;
@@ -1093,3 +1009,4 @@ window.navigateArtwork = navigateArtwork;
 window.addEventListener('DOMContentLoaded', () => {
     initLoader();
 });
+

@@ -242,13 +242,7 @@
         </div>
     </div>
 
-    <!-- SVG Filter for Watercolor Bleed Effect -->
-    <svg style="position: absolute; width: 0; height: 0;" width="0" height="0">
-        <filter id="water-bleed-filter">
-            <feTurbulence type="fractalNoise" baseFrequency="0.01" numOctaves="3" result="noise" />
-            <feDisplacementMap id="bleed-displacement" in="SourceGraphic" in2="noise" scale="0" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-    </svg>
+
 
     <!-- Room Transition Overlay -->
     <div id="room-transition-overlay" class="room-transition-overlay">
